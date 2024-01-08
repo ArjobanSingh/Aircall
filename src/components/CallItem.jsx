@@ -81,9 +81,12 @@ const getIcon = ({ direction, callType }) => {
 };
 
 const UNKNOWN = "unknown";
-const TIME_FORMAT = "hh:mm a";
+const DATE_FORMAT = {
+  FULL: "MMM, DD YYYY",
+  TIME: "hh:mm a",
+};
 
-function CallItem({ call, tab }) {
+function CallItem({ call, tab, isDateRowVisible }) {
   const {
     id: callId,
     is_archived: isArchived,
@@ -145,40 +148,50 @@ function CallItem({ call, tab }) {
   };
 
   return (
-    <div
-      onClick={navigateToCall}
-      className="flex items-center justify-between w-full p-2 border rounded-md border-border"
-    >
-      <div className="flex items-center gap-3">
-        <div className="text-secondary-foreground">{callIcon}</div>
-        <div className="flex flex-col justify-center">
-          <div className="text-sm font-medium text-foreground">{from}</div>
-          <div className="text-xs text-secondary-foreground">
-            {`to ${to} via ${via}`}
+    <>
+      {isDateRowVisible && (
+        <div className="flex items-center justify-center w-full gap-1 text-xs font-medium text-secondary-foreground">
+          <div className="flex-1 border border-dashed border-border" />
+          {dayjs(createdAt).format(DATE_FORMAT.FULL)}
+          <div className="flex-1 border border-dashed border-border" />
+        </div>
+      )}
+      <div
+        onClick={navigateToCall}
+        className="flex items-center justify-between w-full p-2 border rounded-md border-border"
+      >
+        <div className="flex items-center gap-3">
+          <div className="text-secondary-foreground">{callIcon}</div>
+          <div className="flex flex-col justify-center">
+            <div className="text-sm font-medium text-foreground">{from}</div>
+            <div className="text-xs text-secondary-foreground">
+              {`to ${to} via ${via}`}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-1">
-        <div className="text-xs text-secondary-foreground">
-          {dayjs(createdAt).format(TIME_FORMAT)}
+        <div className="flex items-center gap-1">
+          <div className="text-xs text-secondary-foreground">
+            {dayjs(createdAt).format(DATE_FORMAT.TIME)}
+          </div>
+
+          <PlainTooltipWrapper label={mapArchiveLabel[tab]}>
+            <button
+              className="p-2 rounded-sm cursor-pointer hover:bg-secondary"
+              onClick={onToggleArchive}
+            >
+              <ArchivedIcon strokeWidth={1.5} className="w-4 h-4" />
+            </button>
+          </PlainTooltipWrapper>
         </div>
-
-        <PlainTooltipWrapper label={mapArchiveLabel[tab]}>
-          <button
-            className="p-2 rounded-sm cursor-pointer hover:bg-secondary"
-            onClick={onToggleArchive}
-          >
-            <ArchivedIcon strokeWidth={1.5} className="w-4 h-4" />
-          </button>
-        </PlainTooltipWrapper>
       </div>
-    </div>
+    </>
   );
 }
 
 CallItem.propTypes = {
   call: PropTypes.object.isRequired,
+  isDateRowVisible: PropTypes.bool.isRequired,
   tab: PropTypes.oneOf(Object.values(TABS_TYPE)).isRequired,
 };
 

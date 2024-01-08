@@ -7,6 +7,7 @@ import apiInstance from "@/lib/api";
 
 import { Button } from "./ui/button";
 import CallItem from "./CallItem";
+import { isSameDay } from "@/lib/utils";
 
 const mapAllButtonToTab = {
   [TABS_TYPE.ACTIVITY]: "Archive all calls",
@@ -76,9 +77,22 @@ function CallsList({ calls, tab }) {
       )}
       <div className="relative flex-1">
         <div className="absolute inset-0 flex flex-col gap-4 px-4 py-2 overflow-y-auto">
-          {calls.map((call) => (
-            <CallItem key={call.id} call={call} tab={tab} />
-          ))}
+          {calls.map((call, idx) => {
+            const prevCall = calls[idx - 1];
+
+            // Render date in between calls, when different day or at the beginning
+            const isDateRowVisible =
+              idx === 0 || !isSameDay(call.created_at, prevCall.created_at);
+
+            return (
+              <CallItem
+                key={call.id}
+                call={call}
+                tab={tab}
+                isDateRowVisible={isDateRowVisible}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

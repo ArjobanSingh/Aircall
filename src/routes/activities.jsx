@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import dayjs from "dayjs";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useCallsList from "@/hooks/useCallsList";
 import CallsList from "@/components/CallsList";
@@ -14,7 +16,11 @@ function ContentWrapper() {
       return { activities: [], archived: [] };
     }
 
-    return data.reduce(
+    const descOrderData = [...data].sort((a, b) =>
+      dayjs(a.created_at).isAfter(dayjs(b.created_at)) ? -1 : 1
+    );
+
+    return descOrderData.reduce(
       (acc, currentCall) => {
         const { activities, archived } = acc;
         const { is_archived } = currentCall;
