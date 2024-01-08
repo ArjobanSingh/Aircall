@@ -5,11 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useCallsList from "@/hooks/useCallsList";
 import CallsList from "@/components/CallsList";
 import { TABS_TYPE } from "@/lib/constants";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 const tabs = [TABS_TYPE.ACTIVITY, TABS_TYPE.ARCHIVED];
 
 function ContentWrapper() {
-  const { data, error, isLoading } = useCallsList();
+  const { data, error, isLoading, refetch } = useCallsList();
 
   const { activities, archived } = useMemo(() => {
     if (!Array.isArray(data) || !data.length) {
@@ -35,8 +37,33 @@ function ContentWrapper() {
     );
   }, [data]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!data && error) return <div>Some error</div>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col w-full h-full gap-4 px-4 py-2">
+        {Array.from({ length: 8 }, (_, idx) => idx).map((item) => (
+          <div
+            className="flex items-center w-full gap-3 p-2 border rounded-md border-border"
+            key={item}
+          >
+            <Skeleton className="rounded-full w-7 h-7 shrink-0" />
+            <div className="flex flex-col w-full gap-2">
+              <Skeleton className="w-48 h-4 rounded-sm" />
+              <Skeleton className="w-full h-4 rounded-sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!data && error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full gap-2">
+        <div className="text-2xl text-red-500">Oops Something went wrong!!</div>
+        <Button onClick={refetch}>Retry...</Button>
+      </div>
+    );
+  }
 
   const mapDataToTab = {
     [TABS_TYPE.ACTIVITY]: activities,

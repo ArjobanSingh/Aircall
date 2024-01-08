@@ -9,9 +9,15 @@ import { Button } from "./ui/button";
 import CallItem from "./CallItem";
 import { isSameDay } from "@/lib/utils";
 
-const mapAllButtonToTab = {
-  [TABS_TYPE.ACTIVITY]: "Archive all calls",
-  [TABS_TYPE.ARCHIVED]: "Unarchive all",
+const mapPropsToTab = {
+  [TABS_TYPE.ACTIVITY]: {
+    buttonLabel: "Archive all calls",
+    emptyLabel: "Active",
+  },
+  [TABS_TYPE.ARCHIVED]: {
+    buttonLabel: "Unarchive all",
+    emptyLabel: "Archived",
+  },
 };
 
 // Not using this function, please check the comments below for explanation
@@ -68,11 +74,23 @@ function CallsList({ calls, tab }) {
     },
   });
 
+  const { buttonLabel, emptyLabel } = mapPropsToTab[tab];
+
+  if (!calls.length) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full p-4">
+        <div className="text-2xl text-center max-w-60">
+          {`Looks like there are no ${emptyLabel} calls`}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full h-full gap-2">
       {isArchivedTab && (
         <div className="w-full px-4">
-          <Button onClick={unarchiveAllCalls}>{mapAllButtonToTab[tab]}</Button>
+          <Button onClick={unarchiveAllCalls}>{buttonLabel}</Button>
         </div>
       )}
       <div className="relative flex-1">
