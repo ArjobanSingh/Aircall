@@ -22,7 +22,6 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Activities /> },
-      // {}, can add archived calls page
       {
         path: "calls/:callId",
         element: <CallDetails />,

@@ -93,7 +93,6 @@ function Activities() {
           ))}
         </TabsList>
         <ContentWrapper />
-        <div className="w-full h-10">Footer</div>
       </Tabs>
     </div>
   );

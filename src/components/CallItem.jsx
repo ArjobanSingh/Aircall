@@ -1,36 +1,23 @@
+import { memo } from "react";
 import PropTypes from "prop-types";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { CALL_DIRECTION, CALL_TYPE, TABS_TYPE } from "@/lib/constants";
+import { TABS_TYPE, UNKNOWN } from "@/lib/constants";
 import apiInstance from "@/lib/api";
-import {
-  ArchiveRestore,
-  ArchiveX,
-  PhoneCall,
-  PhoneIncoming,
-  PhoneMissed,
-  PhoneOutgoing,
-  ShieldQuestion,
-} from "lucide-react";
+import { ArchiveRestore, ArchiveX } from "lucide-react";
 import { PlainTooltipWrapper } from "./ui/tooltip";
-import { onPressEnter } from "@/lib/utils";
+import {
+  getCallColorClassName,
+  getCallIcon,
+  getCallLabel,
+  onPressEnter,
+} from "@/lib/utils";
 
 const mapArchiveLabel = {
   [TABS_TYPE.ACTIVITY]: "Archive Call",
   [TABS_TYPE.ARCHIVED]: "Unarchive Call",
-};
-
-const MAP_PROPS_TO_DIRECTION = {
-  [CALL_DIRECTION.INBOUND]: {
-    Icon: PhoneIncoming,
-    label: "Incoming call",
-  },
-  [CALL_DIRECTION.OUTBOUND]: {
-    Icon: PhoneOutgoing,
-    label: "Outgoing call",
-  },
 };
 
 const iconProps = {
@@ -38,56 +25,12 @@ const iconProps = {
   strokeWidth: 1.5,
 };
 
-const getIcon = ({ direction, callType }) => {
-  switch (callType) {
-    case CALL_TYPE.MISSED:
-      return (
-        <PlainTooltipWrapper label="Missed call">
-          <PhoneMissed className="text-red-500" {...iconProps} />
-        </PlainTooltipWrapper>
-      );
-    case CALL_TYPE.VOICEMAIL:
-      return (
-        <PlainTooltipWrapper label="Voicemail">
-          <PhoneCall className="text-blue-500" {...iconProps} />
-        </PlainTooltipWrapper>
-      );
-    case CALL_TYPE.ANSWERED: {
-      const { Icon, label } = MAP_PROPS_TO_DIRECTION[direction] ?? {
-        Icon: ShieldQuestion,
-        label: "Unknown call",
-      };
-
-      const className = MAP_PROPS_TO_DIRECTION[direction]
-        ? "text-green-500"
-        : "text-secondary-foreground";
-
-      return (
-        <PlainTooltipWrapper label={label}>
-          <Icon className={className} {...iconProps} />
-        </PlainTooltipWrapper>
-      );
-    }
-    default:
-      // for unknown type, when backend didn't sent correct callType
-      return (
-        <PlainTooltipWrapper label="Unknown call">
-          <ShieldQuestion
-            className="text-secondary-foreground"
-            {...iconProps}
-          />
-        </PlainTooltipWrapper>
-      );
-  }
-};
-
-const UNKNOWN = "unknown";
 const DATE_FORMAT = {
   FULL: "MMM, DD YYYY",
   TIME: "hh:mm a",
 };
 
-function CallItem({ call, tab, isDateRowVisible }) {
+const CallItem = memo(function CallItem({ call, tab, isDateRowVisible }) {
   const {
     id: callId,
     is_archived: isArchived,
@@ -99,7 +42,10 @@ function CallItem({ call, tab, isDateRowVisible }) {
     created_at: createdAt,
   } = call;
 
-  const callIcon = getIcon({ direction, callType });
+  const CallIcon = getCallIcon({ direction, callType });
+  const callLabel = getCallLabel({ direction, callType });
+  const callColorClassName = getCallColorClassName(callType);
+
   const ArchivedIcon = isArchived ? ArchiveRestore : ArchiveX;
 
   const queryClient = useQueryClient();
@@ -165,7 +111,11 @@ function CallItem({ call, tab, isDateRowVisible }) {
         className="flex items-center justify-between w-full gap-2 p-2 border rounded-md cursor-pointer border-border"
       >
         <div className="flex items-center gap-3">
-          <div className="text-secondary-foreground shrink-0">{callIcon}</div>
+          <div className="text-secondary-foreground shrink-0">
+            <PlainTooltipWrapper label={callLabel}>
+              <CallIcon {...iconProps} className={callColorClassName} />
+            </PlainTooltipWrapper>
+          </div>
           <div className="flex flex-col justify-center">
             <div className="text-sm font-medium text-foreground">{from}</div>
             <div className="text-xs break-all text-secondary-foreground line-clamp-1">
@@ -191,7 +141,7 @@ function CallItem({ call, tab, isDateRowVisible }) {
       </div>
     </>
   );
-}
+});
 
 CallItem.propTypes = {
   call: PropTypes.object.isRequired,

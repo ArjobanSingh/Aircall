@@ -14,3 +14,5 @@ export const CALL_DIRECTION = {
   INBOUND: "inbound",
   OUTBOUND: "outbound",
 };
+
+export const UNKNOWN = "unknown";
