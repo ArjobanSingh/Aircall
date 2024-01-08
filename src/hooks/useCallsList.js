@@ -1,13 +1,9 @@
-import { API_URL } from "@/lib/constants";
+import apiInstance from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
 const getCallsList = async () => {
-  const res = await fetch(`${API_URL}/activities`);
-  if (!res.ok) {
-    console.log("what is response: ", res);
-    throw new Error("Something went wrong");
-  }
-  return res.json();
+  const response = await apiInstance.get("activities");
+  return response.data;
 };
 
 export default function useCallsList() {
