@@ -5,8 +5,15 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Root from "./routes/root";
 import ErrorPage from "./routes/error-page";
 import Activities from "./routes/activities";
+import CallDetails from "./components/CallDetails";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -15,9 +22,10 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Activities /> },
+      // {}, can add archived calls page
       {
         path: "calls/:callId",
-        element: <div>Call details</div>,
+        element: <CallDetails />,
       },
     ],
   },
