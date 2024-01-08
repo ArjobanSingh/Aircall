@@ -9,3 +9,9 @@ export function cn(...inputs) {
 export function isSameDay(date1, date2) {
   return dayjs(date1).isSame(date2, "day");
 }
+
+export function onPressEnter(cb) {
+  return (e) => {
+    if (e.key === "Enter") cb(e);
+  };
+}

@@ -8,6 +8,7 @@ import apiInstance from "@/lib/api";
 import { Button } from "./ui/button";
 import CallItem from "./CallItem";
 import { isSameDay } from "@/lib/utils";
+import { ArchiveRestore } from "lucide-react";
 
 const mapPropsToTab = {
   [TABS_TYPE.ACTIVITY]: {
@@ -15,7 +16,7 @@ const mapPropsToTab = {
     emptyLabel: "Active",
   },
   [TABS_TYPE.ARCHIVED]: {
-    buttonLabel: "Unarchive all",
+    buttonLabel: "Unarchive all Calls",
     emptyLabel: "Archived",
   },
 };
@@ -90,7 +91,9 @@ function CallsList({ calls, tab }) {
     <div className="flex flex-col w-full h-full gap-2">
       {isArchivedTab && (
         <div className="w-full px-4">
-          <Button onClick={unarchiveAllCalls}>{buttonLabel}</Button>
+          <Button className="w-full" onClick={unarchiveAllCalls}>
+            <ArchiveRestore className="w-4 h-4 mr-2" /> {buttonLabel}
+          </Button>
         </div>
       )}
       <div className="relative flex-1">

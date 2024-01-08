@@ -15,6 +15,7 @@ import {
   ShieldQuestion,
 } from "lucide-react";
 import { PlainTooltipWrapper } from "./ui/tooltip";
+import { onPressEnter } from "@/lib/utils";
 
 const mapArchiveLabel = {
   [TABS_TYPE.ACTIVITY]: "Archive Call",
@@ -158,19 +159,22 @@ function CallItem({ call, tab, isDateRowVisible }) {
       )}
       <div
         onClick={navigateToCall}
-        className="flex items-center justify-between w-full p-2 border rounded-md border-border"
+        tabIndex={0}
+        role="link"
+        onKeyDown={onPressEnter(navigateToCall)}
+        className="flex items-center justify-between w-full gap-2 p-2 border rounded-md cursor-pointer border-border"
       >
         <div className="flex items-center gap-3">
-          <div className="text-secondary-foreground">{callIcon}</div>
+          <div className="text-secondary-foreground shrink-0">{callIcon}</div>
           <div className="flex flex-col justify-center">
             <div className="text-sm font-medium text-foreground">{from}</div>
-            <div className="text-xs text-secondary-foreground">
+            <div className="text-xs break-all text-secondary-foreground line-clamp-1">
               {`to ${to} via ${via}`}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <div className="text-xs text-secondary-foreground">
             {dayjs(createdAt).format(DATE_FORMAT.TIME)}
           </div>
