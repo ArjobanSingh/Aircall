@@ -14,6 +14,7 @@ import {
   getCallLabel,
   onPressEnter,
 } from "@/lib/utils";
+import { useToast } from "./ui/use-toast";
 
 const mapArchiveLabel = {
   [TABS_TYPE.ACTIVITY]: "Archive Call",
@@ -50,12 +51,13 @@ const CallItem = memo(function CallItem({ call, tab, isDateRowVisible }) {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const navigateToCall = () => {
     navigate(`calls/${callId}`);
   };
 
-  const mutation = useMutation({
+  const { mutate: toggleArchive } = useMutation({
     mutationFn: ({ callId, nextArchiveState }) =>
       apiInstance.patch(`activities/${callId}`, {
         is_archived: nextArchiveState,
@@ -80,8 +82,15 @@ const CallItem = memo(function CallItem({ call, tab, isDateRowVisible }) {
     },
     // If the mutation fails, rollback
     onError: (err, updatedCallObj, context) => {
-      // TODO: show toast on mutation failure
+      const { nextArchiveState } = updatedCallObj;
+
       queryClient.setQueryData(["calls"], context.previousCalls);
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: `There was a problem with ${
+          nextArchiveState ? "archival" : "un-archival"
+        } of the call.`,
+      });
     },
     // Always refetch after error or success:
     onSettled: () => {
@@ -89,9 +98,9 @@ const CallItem = memo(function CallItem({ call, tab, isDateRowVisible }) {
     },
   });
 
-  const onToggleArchive = (e) => {
+  const onToggleArchiveClick = (e) => {
     e.stopPropagation();
-    mutation.mutate({ callId, nextArchiveState: !isArchived });
+    toggleArchive({ callId, nextArchiveState: !isArchived });
   };
 
   return (
@@ -132,7 +141,7 @@ const CallItem = memo(function CallItem({ call, tab, isDateRowVisible }) {
           <PlainTooltipWrapper label={mapArchiveLabel[tab]}>
             <button
               className="p-2 rounded-sm cursor-pointer hover:bg-secondary"
-              onClick={onToggleArchive}
+              onClick={onToggleArchiveClick}
             >
               <ArchivedIcon strokeWidth={1.5} className="w-4 h-4" />
             </button>

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import dayjs from "dayjs";
+import { useSearchParams } from "react-router-dom";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useCallsList from "@/hooks/useCallsList";
@@ -9,6 +10,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 const tabs = [TABS_TYPE.ACTIVITY, TABS_TYPE.ARCHIVED];
+
+const SEARCH_PARAM_KEY = "tab";
+const getSelectedTabFromSearchParams = (searchParams) => {
+  const selectedTab = searchParams.get(SEARCH_PARAM_KEY);
+  return tabs.includes(selectedTab) ? selectedTab : TABS_TYPE.ACTIVITY;
+};
+
+function ListLoader() {
+  return (
+    <div className="flex flex-col w-full h-full gap-4 px-4 py-2">
+      {Array.from({ length: 8 }, (_, idx) => idx).map((item) => (
+        <div
+          className="flex items-center w-full gap-3 p-2 border rounded-md border-border"
+          key={item}
+        >
+          <Skeleton className="rounded-full w-7 h-7 shrink-0" />
+          <div className="flex flex-col w-full gap-2">
+            <Skeleton className="w-48 h-4 rounded-sm" />
+            <Skeleton className="w-full h-4 rounded-sm" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function ContentWrapper() {
   const { data, error, isLoading, refetch } = useCallsList();
@@ -37,24 +63,7 @@ function ContentWrapper() {
     );
   }, [data]);
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col w-full h-full gap-4 px-4 py-2">
-        {Array.from({ length: 8 }, (_, idx) => idx).map((item) => (
-          <div
-            className="flex items-center w-full gap-3 p-2 border rounded-md border-border"
-            key={item}
-          >
-            <Skeleton className="rounded-full w-7 h-7 shrink-0" />
-            <div className="flex flex-col w-full gap-2">
-              <Skeleton className="w-48 h-4 rounded-sm" />
-              <Skeleton className="w-full h-4 rounded-sm" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (isLoading) return <ListLoader />;
 
   if (!data && error) {
     return (
@@ -77,12 +86,23 @@ function ContentWrapper() {
   ));
 }
 
-// TODO: add footer style
 function Activities() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTab = getSelectedTabFromSearchParams(searchParams);
+
+  const onTabChange = (newTab) => {
+    setSearchParams((prevSearchParams) => {
+      const newParams = new URLSearchParams(prevSearchParams);
+      newParams.set(SEARCH_PARAM_KEY, newTab);
+      return newParams;
+    });
+  };
+
   return (
     <div className="w-full h-full">
       <Tabs
-        defaultValue={TABS_TYPE.ACTIVITY}
+        value={selectedTab}
+        onValueChange={onTabChange}
         className="flex flex-col w-full h-full"
       >
         <TabsList className="w-full px-4">

@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -9,6 +8,7 @@ import { Button } from "./ui/button";
 import CallItem from "./CallItem";
 import { isSameDay } from "@/lib/utils";
 import { ArchiveRestore } from "lucide-react";
+import { useToast } from "./ui/use-toast";
 
 const mapPropsToTab = {
   [TABS_TYPE.ACTIVITY]: {
@@ -47,6 +47,7 @@ const unarchiveAll = async () => apiInstance.patch("reset");
 function CallsList({ calls, tab }) {
   const isArchivedTab = tab === TABS_TYPE.ARCHIVED;
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { mutate: unarchiveAllCalls } = useMutation({
     mutationFn: unarchiveAll,
@@ -66,7 +67,10 @@ function CallsList({ calls, tab }) {
     },
     // If the mutation fails, rollback
     onError: (err, updatedCallObj, context) => {
-      // TODO: show toast on mutation failure
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with un-archival of all the calls.",
+      });
       queryClient.setQueryData(["calls"], context.previousCalls);
     },
     // Always refetch after error or success:

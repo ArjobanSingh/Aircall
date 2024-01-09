@@ -15,6 +15,33 @@ import {
 } from "@/lib/utils";
 
 import { PlainTooltipWrapper } from "./ui/tooltip";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+
+function ContentLoader() {
+  return (
+    <div className="flex flex-col w-full h-full px-4 overflow-auto">
+      <div className="flex items-center justify-center w-full p-8">
+        <Skeleton className="w-32 h-32 rounded-full" />
+      </div>
+      <div className="flex flex-col gap-4">
+        {[1, 2].map((key) => (
+          <div key={key} className="w-full p-2 border rounded-sm border-border">
+            {[1, 2].map((nestedKey) => (
+              <div
+                key={nestedKey}
+                className="flex flex-col gap-2 py-2 border-b border-border last:border-b-0"
+              >
+                <Skeleton className="w-1/2 h-3 rounded-sm" />
+                <Skeleton className="w-full h-4 rounded-sm" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function CallContent() {
   const { callId } = useParams();
@@ -25,10 +52,18 @@ function CallContent() {
     return calls?.find((call) => call.id === callId);
   }, [callId, queryClient]);
 
-  const { isLoading, error, data } = useCall(callId, { initialData });
+  const { isLoading, error, data, refetch } = useCall(callId, { initialData });
 
-  if (!data && isLoading) return <div>Loading...</div>;
-  if (!data && error) return <div>Error</div>;
+  if (!data && isLoading) return <ContentLoader />;
+
+  if (!data && error) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-full gap-2">
+        <div className="text-2xl text-red-500">Oops Something went wrong!!</div>
+        <Button onClick={refetch}>Retry...</Button>
+      </div>
+    );
+  }
 
   const {
     direction = UNKNOWN,
