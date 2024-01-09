@@ -1,17 +1,20 @@
-import React, { useMemo } from "react";
-import PropTypes from "prop-types";
-import { useNavigate, useParams } from "react-router-dom";
-import useCall from "@/hooks/useCall";
-import { PlainTooltipWrapper } from "./ui/tooltip";
+import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { ChevronLeft } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+
+import useCall from "@/hooks/useCall";
+import { UNKNOWN } from "@/lib/constants";
 import {
   cn,
   getCallColorClassName,
   getCallIcon,
   getCallLabel,
+  secondsToHms,
 } from "@/lib/utils";
-import { UNKNOWN } from "@/lib/constants";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { PlainTooltipWrapper } from "./ui/tooltip";
 
 function CallContent() {
   const { callId } = useParams();
@@ -33,39 +36,77 @@ function CallContent() {
     from = UNKNOWN,
     to = UNKNOWN,
     via = UNKNOWN,
+    created_at: createdAt,
+    duration,
   } = data;
 
   const CallIcon = getCallIcon({ direction, callType });
   const callLabel = getCallLabel({ direction, callType });
   const callColorClassName = getCallColorClassName(callType);
 
-  const dataRows = [
-    { label: "from", value: from, color: callColorClassName },
-    { label: "to", value: to, color: "text-indigo-400" },
-    { label: "via", value: via, color: "text-indigo-400" },
+  const sections = [
+    {
+      key: 1,
+      data: [
+        {
+          label: "on",
+          value: dayjs(createdAt).format("MMM d, YYYY hh:mm a"),
+          color: "text-foreground",
+        },
+        {
+          label: "for",
+          value: duration ? secondsToHms(duration) : undefined,
+          color: "text-foreground",
+          isHidden: !duration,
+        },
+      ],
+    },
+    {
+      key: 2,
+      data: [
+        { label: "from", value: from, color: callColorClassName },
+        { label: "to", value: to, color: "text-indigo-400" },
+        { label: "via", value: via, color: "text-indigo-400" },
+      ],
+    },
   ];
 
   return (
-    <main className="flex flex-col flex-1 w-full gap-4 px-4">
+    <main className="flex flex-col flex-1 w-full gap-4 px-4 overflow-auto">
       <div className="flex flex-col items-center gap-2 p-8">
-        <div className="p-4 border rounded-full border-border">
+        <div className="p-4 border rounded-full border-border last:border-b-0">
           <CallIcon size={40} className={callColorClassName} />
         </div>
         <h1 className="text-2xl font-medium text-center">{callLabel}</h1>
       </div>
 
-      <div className="w-full p-2 ">
-        {dataRows.map((row) => (
-          <div key={row.label} className="py-1 border-b border-border ">
-            <div className="text-sm text-secondary-foreground">{row.label}</div>
-            <div
-              className={cn("text-base font-medium text-indigo-400", row.color)}
-            >
-              {row.value}
-            </div>
-          </div>
-        ))}
-      </div>
+      {sections.map((section) => (
+        <section
+          key={section.key}
+          className="w-full p-2 border rounded-sm border-border"
+        >
+          {section.data.map((row) =>
+            row.isHidden ? null : (
+              <div
+                key={row.label}
+                className="py-1 border-b border-border last:border-b-0"
+              >
+                <div className="text-sm text-secondary-foreground">
+                  {row.label}
+                </div>
+                <div
+                  className={cn(
+                    "text-base font-medium text-indigo-400",
+                    row.color
+                  )}
+                >
+                  {row.value}
+                </div>
+              </div>
+            )
+          )}
+        </section>
+      ))}
     </main>
   );
 }
@@ -84,7 +125,7 @@ function CallDetails() {
             <ChevronLeft className="w-6 h-6" />
           </button>
         </PlainTooltipWrapper>
-        <div>Call Details</div>
+        <div className="text-base">Call Details</div>
       </header>
       <CallContent />
     </div>

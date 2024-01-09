@@ -73,3 +73,26 @@ const mapCallColorToCallType = {
 export const getCallColorClassName = (callType) => {
   return mapCallColorToCallType[callType] ?? "text-secondary-foreground";
 };
+
+const getPluralValue = (value, singular, plural) =>
+  value === 1 ? `${value} ${singular}` : `${value} ${plural}`;
+
+function joinWithCommasAndAnd(items) {
+  return items.length <= 1
+    ? items.join("")
+    : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
+export function secondsToHms(durationInSeconds) {
+  const seconds = Number(durationInSeconds);
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor((seconds % 3600) % 60);
+
+  const hDisplay = h > 0 ? getPluralValue(h, "hour", "hours") : "";
+  const mDisplay = m > 0 ? getPluralValue(m, "minute", "minutes") : "";
+  const sDisplay = s > 0 ? getPluralValue(s, "second", "seconds") : "";
+  return joinWithCommasAndAnd(
+    [hDisplay, mDisplay, sDisplay].filter((item) => item)
+  );
+}
