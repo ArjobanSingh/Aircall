@@ -1,6 +1,6 @@
 # React + Vite
 
-This app is also hosted on: https://aircall-task.netlify.app/?tab=Archived
+This app is also hosted on: https://aircall-task.netlify.app
 
 To run this project locally:
 1. Clone this repository
